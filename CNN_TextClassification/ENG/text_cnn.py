@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 
-
 class TextCNN(object):
     def __init__(self,
                  sequence_length,
