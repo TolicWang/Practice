@@ -30,7 +30,7 @@ tf.flags.DEFINE_integer(flag_name='batch_size', default_value=64, docstring='bat
 tf.flags.DEFINE_integer(flag_name='num_epochs', default_value=200, docstring='number of epochs')
 tf.flags.DEFINE_integer(flag_name='evaluate_every', default_value=100, docstring='evalutae every')
 tf.flags.DEFINE_integer(flag_name='checkpoint_every', default_value=100, docstring="Saving")
-tf.flags.DEFINE_float(flag_name='learning_rate', default_value=5, docstring='learning rate')
+tf.flags.DEFINE_float(flag_name='learning_rate', default_value=0.1, docstring='learning rate')
 
 tf.flags.DEFINE_boolean(flag_name='allow_soft_placement', default_value='True',
                         docstring='allow_soft_placement')  # 找不到指定设备时，是否自动分配
@@ -83,9 +83,9 @@ with tf.Graph().as_default():
                       )
         global_step = tf.Variable(0, trainable=False)
         with tf.device('/gpu:0'):
-            # train_step = tf.train.GradientDescentOptimizer(
-            #     FLAGS.learning_rate).minimize(loss=cnn.loss, global_step=global_step)
-            train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
+            train_step = tf.train.GradientDescentOptimizer(
+                FLAGS.learning_rate).minimize(loss=cnn.loss, global_step=global_step)
+            # train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
     sess.run(tf.global_variables_initializer())
     last = datetime.datetime.now()
     for i in range(100000):
