@@ -7,9 +7,6 @@ def clean_str(string):
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     string.strip('\n')
-    # string = re.sub("[A-Za-z0-9(),\!\?\'\`\,\'\。\，\－\:\４\Ｍ \\n\@ \：\？\....."
-    #                 "\（ \）\Ｑ\；\…\！\-\、\_____\】\【\^\&\+\-\=\*\~\/\２\６\１"
-    #                 "\Ｐ\Ｓ \“\”]", "", string)
     string = re.sub(r"[^\u4e00-\u9fff]", " ", string)
     string = re.sub(r"\s{2,}", " ", string)
     return string.strip()
@@ -48,9 +45,11 @@ def gen_batch(x_train, y_train, begin, batch_size):
     return x, y
 
 
+if __name__ == '__main__':
+    positive_data_file = '../data/ham_5000.utf8'
+    negative_data_file = '../data/spam_5000.utf8'
+    x_text,y=load_data_and_labels(positive_data_file, negative_data_file)
+    print(x_text)
 
 
-
-# positive_data_file = './data/ham_100.utf8'
-# negative_data_file = './data/spam_100.utf8'
 
