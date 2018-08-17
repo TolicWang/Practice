@@ -7,6 +7,11 @@ import os
 
 
 def clean_str(string):
+    """
+    该函数的作用是去掉一个字符串中的所有非中文字符
+    :param string:
+    :return: 返回处理后的字符串
+    """
     string.strip('\n')
     string = re.sub(r"[^\u4e00-\u9fff]", " ", string)
     string = re.sub(r"\s{2,}", " ", string)
@@ -14,6 +19,11 @@ def clean_str(string):
 
 
 def cut_line(line):
+    """
+    该函数的作用是 先清洗字符串，然后分词
+    :param line:
+    :return: 分词后的结果，如 ：     衣带  渐宽  终  不悔
+    """
     line = clean_str(line)
     seg_list = jieba.cut(line)
     cut_words = " ".join(seg_list)
@@ -21,6 +31,14 @@ def cut_line(line):
 
 
 def load_data_and_labels(positive_data_file, negative_data_file):
+    """
+    按行载入数据，然后分词。同时构造标签
+    :param positive_data_file:
+    :param negative_data_file:
+    :return:  分词后的结果和标签
+    x_text:   ['衣带 渐宽 终 不悔',' 为 伊 消得 人憔悴']
+    y: [[1 0],[ 1 0]]
+    """
     positive = []
     negative = []
     for line in open(positive_data_file, encoding='utf-8'):
@@ -38,6 +56,14 @@ def load_data_and_labels(positive_data_file, negative_data_file):
 
 
 def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=None):
+    """
+    该函数的作用是 按最大长度Padding样本
+    :param sentences:
+    :param padding_token: padding 的内容，默认为'UNK'
+    :param padding_sentence_length:
+    :return: 例如，如果最长度设置为5，
+    则['明天','你好']将被padding为 ['明天','你好','UNK',UNK'，UNK']
+    """
     max_padding_length = padding_sentence_length if padding_sentence_length is not \
                                                     None else max([len(sentence) for sentence in sentences])
     for i,sentence in enumerate(sentences):
@@ -62,6 +88,15 @@ def embedding_sentences(embedding_file='./embedding.model',
                         embedding_size=50,
                         min_count=5,
                         window=5):
+    """
+    本函数的作用是将 分词后的文本转化为用词向量来表示
+    :param embedding_file:
+    :param padded_sentences:
+    :param embedding_size:
+    :param min_count:
+    :param window:
+    :return:
+    """
     if os.path.exists(embedding_file):
         model = Word2Vec.load(embedding_file)
     else:
@@ -99,7 +134,6 @@ if __name__ == '__main__':
         padding_sentence(sentences=x_text, padding_sentence_length=100)
     embedded_sentences, vocabulary_len = embedding_sentences(padded_sentences=padded_sentences)
     x = np.array(embedded_sentences)
-
     print(x.shape)
     x_batch, y_batch = gen_batch(x, y, 2, 5)
     print(x_batch.shape)
