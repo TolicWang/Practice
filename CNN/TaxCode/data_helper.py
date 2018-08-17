@@ -73,15 +73,16 @@ def load_data_and_labels(data_file, label_file):
     x_text:  [['云','服务费'],['住宿费'],['租赁','服务费'],['塔吊','费用']]
     y:       [1  3  5  6]
     """
-    print("===========================================")
+    print("[===========================================")
     print("------load_data_and_labels() begin!--------")
     print("--------", datetime.datetime.now().isoformat(sep='-'), "-------")
-    print("===========================================")
     x_text = []
     for line in open(data_file, encoding='utf-8'):
         x_text.append(cut_line(line).split())
-    y = np.array(pd.read_csv(label_file))
-    y = y.reshape(len(y))
+    labels = pd.read_csv(label_file, names=['C'])
+    y = np.array(labels['C'])
+    print("x_test len = {:d},y len = {:d}".format(len(x_text), len(y)))
+    print("===========================================]\n\n")
     return x_text, y
 
 
@@ -93,10 +94,10 @@ def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=Non
     :param padding_sentence_length: 以5为例
     :return: [['今天','天气','晴朗','UNK','UNK'],['你','真','好','UNK'，'UNK']]
     """
-    print("===========================================")
+    print("[===========================================")
     print("----------padding_sentence() begin!--------")
     print("--------", datetime.datetime.now().isoformat(sep='-'), "-------")
-    print("===========================================")
+
     max_padding_length = padding_sentence_length if padding_sentence_length is not \
                                                     None else max([len(sentence) for sentence in sentences])
     for i, sentence in enumerate(sentences):
@@ -104,13 +105,15 @@ def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=Non
             sentence.extend([padding_token] * (max_padding_length - len(sentence)))
         else:
             sentences[i] = sentence[:max_padding_length]
+    print('sentences len={:d},max_padding_length={:d}'.format(len(sentence), max_padding_length))
+    print("===========================================]\n\n")
     return sentences, max_padding_length
 
 
-def word2vector(sentences, embedding_size=50, min_count=5, window=5,
+def word2vector(sentences, embedding_dimension=50, min_count=5, window=5,
                 embedding_file='./embedding.model'):
     print('-------word2vector------------')
-    train_model = Word2Vec(sentences=sentences, size=embedding_size,
+    train_model = Word2Vec(sentences=sentences, size=embedding_dimension,
                            min_count=min_count, window=window)
     train_model.save(embedding_file)
     return train_model
@@ -118,7 +121,7 @@ def word2vector(sentences, embedding_size=50, min_count=5, window=5,
 
 def embedding_sentences(embedding_file='./data/sgns.renmin.word',
                         padded_sentences=None,
-                        embedding_size=50,
+                        embedding_dimension=50,
                         min_count=5,
                         window=5):
     """
@@ -128,7 +131,7 @@ def embedding_sentences(embedding_file='./data/sgns.renmin.word',
     你    0.1 0.2 0.3 0.4
     明天  0.3 0.5 0.2 0.1
     :param padded_sentences:[['你','明天,'UNK'],['明天','UNK','UNK']]
-    :param embedding_size:  4
+    :param embedding_dimension:  4
     :param min_count:
     :param window:
     :return:
@@ -136,22 +139,22 @@ def embedding_sentences(embedding_file='./data/sgns.renmin.word',
      [[0.3,0.5,0.2,0.1],[0,0,0,0],[0,0,0,0]]]
      shape: (2,3,4)
     """
-    print("===========================================")
+    print("[===========================================")
     print("--------embedding_sentence() begin!--------")
     print("--------", datetime.datetime.now().isoformat(sep='-'), "-------")
-    print("===========================================")
-    if os.path.exists(embedding_file):
+
+    if os.path.exists(path=embedding_file):
         model = gensim.models.KeyedVectors.load_word2vec_format(
-            './data/sgns.renmin.word', binary=False)
-        embedded_size = model.vector_size
+            embedding_file, binary=False)
+        embedded_dimension = model.vector_size
     else:
         model = word2vector(sentences=padded_sentences,
-                            embedding_size=embedding_size,
+                            embedding_dimension=embedding_dimension,
                             min_count=min_count,
                             window=window)
-        embedded_size = embedding_size
+        embedded_dimension = embedding_dimension
     all_vectors = []
-    embedding_unknown = [0 for i in range(embedded_size)]
+    embedding_unknown = [0 for i in range(embedded_dimension)]
     for sentence in padded_sentences:
         this_vector = []
         for word in sentence:
@@ -161,6 +164,10 @@ def embedding_sentences(embedding_file='./data/sgns.renmin.word',
                 this_vector.append(embedding_unknown)
         all_vectors.append(this_vector)
     all_vectors = np.array(all_vectors)
+    print("embedded sentence shape {}".format(all_vectors.shape))
+    print("--------embedding_sentence() finished!--------")
+    print("--------", datetime.datetime.now().isoformat(sep='-'), "-------")
+    print("===========================================]\n\n")
     return all_vectors, len(model.wv.vocab)
 
 
@@ -177,8 +184,7 @@ if __name__ == '__main__':
     data = './data/test_text.txt'
     label = './data/test_label.txt'
     xs, ys = load_data_and_labels(data, label)
-    padded_sentences, padded_length = padding_sentence(xs, padding_sentence_length=7)
-    # print(padded_sentences)
-    # print(padded_length)
-    x, vocabulary_len = embedding_sentences(padded_sentences=padded_sentences)
-    print(x)
+    # padded_sentences, padded_length = padding_sentence(xs, padding_sentence_length=7)
+    # x, vocabulary_len = embedding_sentences(padded_sentences=padded_sentences)
+    # print(x.shape)
+

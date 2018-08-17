@@ -11,16 +11,22 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # 指定一个GPU
 # parameters
 
 # Data loadding  params
-tf.flags.DEFINE_float(flag_name='dev_sample_percentage', default_value=0.1,
-                      docstring='Percentage of the training data to use for validation')
-tf.flags.DEFINE_string(flag_name='data_file', default_value='./data/test_text.txt',
-                       docstring='data')
-tf.flags.DEFINE_string(flag_name='label_file', default_value='./data/test_label.txt',
-                       docstring='label')
+tf.flags.DEFINE_string(flag_name='train_data_file', default_value='./data/train_text.txt',
+                       docstring='train data')
+tf.flags.DEFINE_string(flag_name='train_label_file', default_value='./data/train_label.txt',
+                       docstring='train label')
+
+tf.flags.DEFINE_string(flag_name='test_data_file', default_value='./data/test_text.txt',
+                       docstring='test data')
+tf.flags.DEFINE_string(flag_name='test_label_file', default_value='./data/test_label.txt',
+                       docstring='test label')
+
+tf.flags.DEFINE_string(flag_name='embedding_file', default_value='./data/sgns.merge.word',
+                       docstring='test label')
 
 # Model hyperparams
-tf.flags.DEFINE_integer(flag_name='embedding_size', default_value=300, docstring='dimensionality of word')
-tf.flags.DEFINE_integer(flag_name='padding_sentence_size', default_value=7, docstring='padding seize of eatch sample')
+tf.flags.DEFINE_integer(flag_name='embedding_dimension', default_value=300, docstring='dimensionality of word')
+tf.flags.DEFINE_integer(flag_name='padding_sentence_length', default_value=7, docstring='padding seize of eatch sample')
 tf.flags.DEFINE_string(flag_name='filter_size', default_value='3,4,5', docstring='filter size ')
 tf.flags.DEFINE_integer(flag_name='num_filters', default_value=128, docstring='deep of filters')
 tf.flags.DEFINE_float(flag_name='dropout', default_value=0.5, docstring='Drop out')
@@ -44,28 +50,31 @@ for attr, value in sorted(FLAGS.__flags.items()):
     print('{}={}'.format(attr.upper(), value))
 
 # Load data and cut
-x_text, y = data_helper.load_data_and_labels(FLAGS.data_file, FLAGS.label_file)
+x_train_data, y_train = data_helper.load_data_and_labels(FLAGS.train_data_file, FLAGS.train_label_file)
+x_test_data, y_test = data_helper.load_data_and_labels(FLAGS.test_data_file, FLAGS.test_label_file)
 
 # Padding sentence
-padded_sentences, max_padding_length = data_helper.padding_sentence(sentences=x_text,
-                                                                    padding_sentence_length=FLAGS.padding_sentence_size)
-x, vocabulary_len = data_helper.embedding_sentences(padded_sentences=padded_sentences,
-                                                    embedding_size=FLAGS.embedding_size)
+padded_sentences_train, max_padding_length = data_helper.padding_sentence(
+    sentences=x_train_data, padding_sentence_length=FLAGS.padding_sentence_length)
+padded_sentences_test, max_padding_length = data_helper.padding_sentence(
+    sentences=x_test_data, padding_sentence_length=FLAGS.padding_sentence_length)
 
-np.random.seed(10)
-shuffle_indices = np.random.permutation(np.arange(len(y)))
-x_shuffled = x[shuffle_indices]  # 打乱数据
-y_shuffled = y[shuffle_indices]
+x_test, vocabulary_len = data_helper.embedding_sentences(
+    embedding_file=FLAGS.embedding_file, padded_sentences=padded_sentences_test,
+    embedding_dimension=FLAGS.embedding_dimension)
+x_train, vocabulary_len = data_helper.embedding_sentences(
+    embedding_file=FLAGS.embedding_file, padded_sentences=padded_sentences_train,
+    embedding_dimension=FLAGS.embedding_dimension)
 
-dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
-x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
-y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]  # 划分训练集和验证集
-#
+
+print('--------------------------preProcess finished!-----------------------')
 print('--------------------------preProcess finished!-----------------------')
 print("vocabulary length={}".format(vocabulary_len))
-print("x.shape = {}".format(x_shuffled.shape))
-print("y.shape = {}".format(y_shuffled.shape))
-print('train/dev split:{:d}/{:d}'.format(len(y_train), len(y_dev)))
+print("x_train.shape = {}".format(x_train.shape))
+print("y_train.shape = {}".format(y_train.shape))
+print("x_test.shape = {}".format(x_test.shape))
+print("y_test.shape = {}".format(y_test.shape))
+print('train/dev split:{:d}/{:d}'.format(len(y_train), len(y_test)))
 # print(y_train[:100])
 #
 
@@ -79,7 +88,7 @@ with tf.Graph().as_default():
     with sess.as_default():
         cnn = TextCNN(sequence_length=x_train.shape[1],
                       num_classes=3510,
-                      embedding_size=FLAGS.embedding_size,
+                      embedding_dimension=FLAGS.embedding_dimension,
                       filter_sizes=list(map(int, FLAGS.filter_size.split(','))),
                       num_filters=FLAGS.num_filters,
                       l2_reg_lambda=FLAGS.L2_reg_lambda
@@ -91,16 +100,16 @@ with tf.Graph().as_default():
             # train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
     sess.run(tf.global_variables_initializer())
     last = datetime.datetime.now()
-    for i in range(100000):
+    for i in range(500000):
         x, y = data_helper.gen_batch(x_train, y_train, i, FLAGS.batch_size)
         feed_dic = {cnn.input_x: x, cnn.input_y: y, cnn.dropout_keep_prob: FLAGS.dropout}
         _, loss, acc = sess.run([train_step, cnn.loss, cnn.accuracy], feed_dict=feed_dic)
 
-        if (i % 50) == 0:
+        if (i % 100) == 0:
             now = datetime.datetime.now()
             print('loss:{},acc:{}---time:{}'.format(loss, acc, now - last))
             last = now
         if (i % 1000 == 0):
-            feed_dic = {cnn.input_x: x_dev, cnn.input_y: y_dev, cnn.dropout_keep_prob: 1.0}
+            feed_dic = {cnn.input_x: x_test, cnn.input_y: y_test, cnn.dropout_keep_prob: 1.0}
             _, loss, acc = sess.run([train_step, cnn.loss, cnn.accuracy], feed_dict=feed_dic)
             print('-------------loss:{},acc:{}---time:{}--step:{}'.format(loss, acc, now - last, i))
