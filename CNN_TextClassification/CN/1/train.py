@@ -7,7 +7,7 @@ import data_helper
 from tensorflow.contrib import learn
 from text_cnn import TextCNN
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0' #指定一个GPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # 指定一个GPU
 # parameters
 
 # Data loadding  params
@@ -46,7 +46,6 @@ x_text, y = data_helper.load_data_and_labels(FLAGS.positive_data_file, FLAGS.neg
 
 # max_document_length = max([len(x.split(' ')) for x in x_text])
 max_document_length = 120
-
 vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
 x = np.array(list(vocab_processor.fit_transform(x_text)))  # 得到每个样本中，每个单词对应在词典中的序号
 
@@ -55,12 +54,11 @@ shuffle_indices = np.random.permutation(np.arange(len(y)))
 x_shuffled = x[shuffle_indices]  # 打乱数据
 y_shuffled = y[shuffle_indices]
 
-
 dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
 x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
 y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]  # 划分训练集和验证集
 #
-# print(x_train)
+
 print(x_train.shape)
 print(len(vocab_processor.vocabulary_))
 print('train/dev split:{:d}/{:d}'.format(len(y_train), len(y_dev)))
@@ -99,4 +97,4 @@ with tf.Graph().as_default():
         if (i % 1000 == 0):
             feed_dic = {cnn.input_x: x_dev, cnn.input_y: y_dev, cnn.dropout_keep_prob: 1.0}
             _, loss, acc = sess.run([train_step, cnn.loss, cnn.accuracy], feed_dict=feed_dic)
-            print('-------------loss:{},acc:{}---time:{}--step:{}'.format(loss, acc, now - last,i))
+            print('-------------loss:{},acc:{}---time:{}--step:{}'.format(loss, acc, now - last, i))
