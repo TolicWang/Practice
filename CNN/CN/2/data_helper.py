@@ -1,5 +1,4 @@
 from gensim.models.word2vec import Word2Vec
-import gensim
 import jieba
 import re
 import numpy as np
@@ -58,11 +57,10 @@ def load_data_and_labels(positive_data_file, negative_data_file):
 def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=None):
     """
     该函数的作用是 按最大长度Padding样本
-    :param sentences:
+    :param sentences: [['今天','天气','晴朗'],['你','真','好']]
     :param padding_token: padding 的内容，默认为'UNK'
-    :param padding_sentence_length:
-    :return: 例如，如果最长度设置为5，
-    则['明天','你好']将被padding为 ['明天','你好','UNK',UNK'，UNK']
+    :param padding_sentence_length: 以5为例
+    :return: [['今天','天气','晴朗','UNK','UNK'],['你','真','好','UNK'，'UNK']]
     """
     max_padding_length = padding_sentence_length if padding_sentence_length is not \
                                                     None else max([len(sentence) for sentence in sentences])
@@ -90,12 +88,16 @@ def embedding_sentences(embedding_file='./embedding.model',
                         window=5):
     """
     本函数的作用是将 分词后的文本转化为用词向量来表示
-    :param embedding_file:
-    :param padded_sentences:
-    :param embedding_size:
+    如果有模型就载入，没有就利用Word2Vec训练
+    :param embedding_file: 词向量模型 embedding_model
+    你    0.1 0.2 0.3 0.4
+    明天  0.3 0.5 0.2 0.1
+    :param padded_sentences:[['你','太阳],['明天]]
+    :param embedding_size:  4
     :param min_count:
     :param window:
     :return:
+    [[0.1,0.2,0.3,0.4,0,0,0,0],[0.3,0.5,0.2,0.1,0,0,0,0]]
     """
     if os.path.exists(embedding_file):
         model = Word2Vec.load(embedding_file)
