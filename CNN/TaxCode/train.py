@@ -6,47 +6,11 @@ import datetime
 import data_helper
 from tensorflow.contrib import learn
 from text_cnn import TextCNN
+from config import FLAGS
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # 指定一个GPU
-# parameters
-
-# Data loadding  params
-tf.flags.DEFINE_string(flag_name='train_data_file', default_value='./data/train_text.txt',
-                       docstring='train data')
-tf.flags.DEFINE_string(flag_name='train_label_file', default_value='./data/train_label.txt',
-                       docstring='train label')
-
-tf.flags.DEFINE_string(flag_name='test_data_file', default_value='./data/test_text.txt',
-                       docstring='test data')
-tf.flags.DEFINE_string(flag_name='test_label_file', default_value='./data/test_label.txt',
-                       docstring='test label')
-
-tf.flags.DEFINE_string(flag_name='embedding_file', default_value='./data/sgns.merge.word',
-                       docstring='test label')
-
-# Model hyperparams
-tf.flags.DEFINE_integer(flag_name='embedding_dimension', default_value=300, docstring='dimensionality of word')
-tf.flags.DEFINE_integer(flag_name='padding_sentence_length', default_value=7, docstring='padding seize of eatch sample')
-tf.flags.DEFINE_string(flag_name='filter_size', default_value='3,4,5', docstring='filter size ')
-tf.flags.DEFINE_integer(flag_name='num_filters', default_value=128, docstring='deep of filters')
-tf.flags.DEFINE_float(flag_name='dropout', default_value=0.5, docstring='Drop out')
-tf.flags.DEFINE_float(flag_name='L2_reg_lambda', default_value=0.0, docstring='L2')
-
-# Training params
-tf.flags.DEFINE_integer(flag_name='batch_size', default_value=64, docstring='batch size')
-tf.flags.DEFINE_float(flag_name='learning_rate', default_value=0.1, docstring='learning rate')
-
-tf.flags.DEFINE_boolean(flag_name='allow_soft_placement', default_value='True',
-                        docstring='allow_soft_placement')  # 找不到指定设备时，是否自动分配
-tf.flags.DEFINE_boolean(flag_name='log_device_placement', default_value='False',
-                        docstring='log_device_placement ')  # 是否打印配置日志
-
-FLAGS = tf.flags.FLAGS
-# FLAGS.flag_values_dict()  # 解析参数成字典
-FLAGS._parse_flags()
-
 print('\n----------------Parameters--------------')  # 在网络训练之前，先打印出来看看
-for attr, value in sorted(FLAGS.__flags.items()):
+for attr, value in (FLAGS.__flags.items()):
     print('{}={}'.format(attr.upper(), value))
 
 # Load data and cut
@@ -100,7 +64,7 @@ with tf.Graph().as_default():
             # train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
     sess.run(tf.global_variables_initializer())
     last = datetime.datetime.now()
-    for i in range(500000):
+    for i in range(FLAGS.training_ite):
         x, y = data_helper.gen_batch(x_train, y_train, i, FLAGS.batch_size)
         feed_dic = {cnn.input_x: x, cnn.input_y: y, cnn.dropout_keep_prob: FLAGS.dropout}
         _, loss, acc = sess.run([train_step, cnn.loss, cnn.accuracy], feed_dict=feed_dic)
