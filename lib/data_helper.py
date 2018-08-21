@@ -95,7 +95,28 @@ def load_data_and_labels(data_file, label_file=None, type='APPEND'):
     return x_text, y
 
 
-def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=None):
+def padding_moving(sentence, padding_token='UNK'):
+    """
+    该函数的作用是将非'padding_token'的字符向中间移动
+    :param sentence:
+    :return:
+    example :
+    ['马铃薯', '雪', '花粉', 'UNK', 'UNK', 'UNK', 'UNK']
+    return ['UNK', 'UNK','马铃薯', '雪', '花粉', 'UNK', 'UNK']
+    ['机油', 'UNK', 'UNK', 'UNK', 'UNK', 'UNK', 'UNK']
+    return [ 'UNK', 'UNK', 'UNK', '机油','UNK', 'UNK', 'UNK']
+    """
+    sentence_len = len(sentence)
+    words_len = np.sum(([item != padding_token for item in sentence]) * 1)
+    move_len = (sentence_len - words_len) // 2
+    for i in range(move_len):
+        sentence.insert(0, padding_token)
+        sentence.pop()
+    return sentence
+
+
+def padding_sentence(sentences, padding_token='UNK', padding_move=False,
+                     padding_sentence_length=None):
     """
     该函数的作用是 按最大长度Padding样本
     :param sentences: [['今天','天气','晴朗'],['你','真','好']]
@@ -112,8 +133,11 @@ def padding_sentence(sentences, padding_token='UNK', padding_sentence_length=Non
     for i, sentence in enumerate(sentences):
         if len(sentence) < max_padding_length:
             sentence.extend([padding_token] * (max_padding_length - len(sentence)))
+            if padding_move:
+                sentences[i] = padding_moving(sentence)
         else:
             sentences[i] = sentence[:max_padding_length]
+
     print('sentences len={:d},max_padding_length={:d}'.format(len(sentence), max_padding_length))
     print("===========================================]\n\n")
     return sentences, max_padding_length
