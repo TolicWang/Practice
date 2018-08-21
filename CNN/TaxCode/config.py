@@ -9,7 +9,7 @@ tf.flags.DEFINE_string(flag_name='test_data_file', default_value='./data/test_te
                        docstring='test data')
 tf.flags.DEFINE_string(flag_name='test_label_file', default_value='./data/test_label.txt',
                        docstring='test label')
-tf.flags.DEFINE_string(flag_name='embedding_file', default_value='./data/sgns.renmin.word',
+tf.flags.DEFINE_string(flag_name='embedding_file', default_value='./data/sgns.merge.word',
                        docstring='test label')
 
 #   data processing parameters
@@ -26,7 +26,7 @@ tf.flags.DEFINE_integer(flag_name='num_classes', default_value=3510, docstring='
 tf.flags.DEFINE_float(flag_name='dev_sample_percentage', default_value=0.1,
                       docstring='Percentage of the training data to use for validation')
 tf.flags.DEFINE_integer(flag_name='batch_size', default_value=64, docstring='batch size')
-tf.flags.DEFINE_float(flag_name='learning_rate', default_value=0.1, docstring='learning rate')
+tf.flags.DEFINE_float(flag_name='learning_rate', default_value=0.001, docstring='learning rate')
 tf.flags.DEFINE_boolean(flag_name='allow_soft_placement', default_value='True',
                         docstring='allow_soft_placement')  # 找不到指定设备时，是否自动分配
 tf.flags.DEFINE_boolean(flag_name='log_device_placement', default_value='False',

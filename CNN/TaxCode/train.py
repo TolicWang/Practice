@@ -26,9 +26,15 @@ x, vocabulary_len = data_helper.embedding_sentences(
     embedding_file=FLAGS.embedding_file, padded_sentences=padded_sentences_train,
     embedding_dimension=FLAGS.embedding_dimension)
 
+# Shuffle data randomly
+np.random.seed(100)
+shuffle_indices = np.random.permutation(np.arange(len(y)))
+x_shuffled = x[shuffle_indices]
+y_shuffled = y[shuffle_indices]
+
 dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
-x_train, x_dev = x[:dev_sample_index], x[dev_sample_index:]
-y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
+x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
+y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 
 print('--------------------------preProcess finished!-----------------------')
 print('--------------------------preProcess finished!-----------------------')
