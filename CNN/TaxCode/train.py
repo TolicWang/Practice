@@ -36,6 +36,9 @@ dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
 x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
 y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 
+
+
+
 print('--------------------------preProcess finished!-----------------------')
 print('--------------------------preProcess finished!-----------------------')
 print("vocabulary length={}".format(vocabulary_len))
@@ -47,8 +50,11 @@ print("y_dev.shape = {}".format(y_dev.shape))
 print('train/dev split:{:d}/{:d}'.format(len(y_train), len(y_dev)))
 # print(y_train[:100])
 #
-
-
+global_step = tf.Variable(0, trainable=False)
+learn_rate = tf.train.exponential_decay(FLAGS.learning_rate_base,
+                                        global_step,
+                                        x_train.shape[0]//FLAGS.batch_size,
+                                        FLAGS.learning_rate_decay)
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(allow_soft_placement=FLAGS.allow_soft_placement,
                                   log_device_placement=FLAGS.log_device_placement)
@@ -63,7 +69,7 @@ with tf.Graph().as_default():
                       num_filters=FLAGS.num_filters,
                       l2_reg_lambda=FLAGS.L2_reg_lambda
                       )
-        global_step = tf.Variable(0, trainable=False)
+
         with tf.device('/gpu:0'):
             train_step = tf.train.GradientDescentOptimizer(
                 FLAGS.learning_rate).minimize(loss=cnn.loss, global_step=global_step)
