@@ -226,15 +226,6 @@ def calculate_words_repetition_rate(words_one, words_two, type=1):
     return repetition_rate
 
 
-def gen_batch(x_train, y_train, begin, batch_size):
-    data_size = len(y_train)
-    start = (begin * batch_size) % data_size
-    end = min(start + batch_size, data_size)
-    x = x_train[start:end]
-    y = y_train[start:end]
-    return x, y
-
-
 if __name__ == '__main__':
     data = './test_text.txt'
     label = './test_label.txt'
