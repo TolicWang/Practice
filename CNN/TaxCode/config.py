@@ -15,6 +15,7 @@ tf.flags.DEFINE_string(flag_name='embedding_file', default_value='./data/sgns.me
 #   data processing parameters
 tf.flags.DEFINE_integer(flag_name='embedding_dimension', default_value=300, docstring='dimensionality of word')
 tf.flags.DEFINE_integer(flag_name='padding_sentence_length', default_value=7, docstring='padding seize of eatch sample')
+tf.flags.DEFINE_boolean(flag_name='padding_move', default_value=True, docstring='padding_move')
 #   net work parameters
 tf.flags.DEFINE_string(flag_name='filter_size', default_value='3,4,5', docstring='filter size ')
 tf.flags.DEFINE_integer(flag_name='num_filters', default_value=128, docstring='deep of filters')
@@ -23,11 +24,11 @@ tf.flags.DEFINE_float(flag_name='L2_reg_lambda', default_value=0.0, docstring='L
 tf.flags.DEFINE_integer(flag_name='num_classes', default_value=3510, docstring='num_classes')
 
 #   Training params
-tf.flags.DEFINE_float(flag_name='dev_sample_percentage', default_value=0.1,
+tf.flags.DEFINE_float(flag_name='dev_sample_percentage', default_value=0.025,
                       docstring='Percentage of the training data to use for validation')
 tf.flags.DEFINE_integer(flag_name='batch_size', default_value=64, docstring='batch size')
-tf.flags.DEFINE_float(flag_name='learning_rate_base', default_value=0.01, docstring='learning rate')
-tf.flags.DEFINE_float(flag_name='learning_rate_decay', default_value=0.9, docstring='learning_rate_decay')
+tf.flags.DEFINE_float(flag_name='learning_rate_base', default_value=0.08, docstring='learning rate')
+tf.flags.DEFINE_float(flag_name='learning_rate_decay', default_value=0.92, docstring='learning_rate_decay')
 tf.flags.DEFINE_boolean(flag_name='allow_soft_placement', default_value='True',
                         docstring='allow_soft_placement')  # 找不到指定设备时，是否自动分配
 tf.flags.DEFINE_boolean(flag_name='log_device_placement', default_value='False',
