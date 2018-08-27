@@ -24,7 +24,10 @@ with tf.Graph().as_default():
                 FLAGS.learning_rate).minimize(loss=cnn.loss, global_step=global_step)
             # train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
     saver = tf.train.Saver()
-    sess.run(tf.global_variables_initializer())
+    if os.path.exists(FLAGS.model_save_path+'checkpoint'):
+        saver.restore(sess, tf.train.latest_checkpoint(FLAGS.model_save_path))
+    else:
+        sess.run(tf.global_variables_initializer())
     last = datetime.datetime.now()
     for i in range(500000):
         batch_x, batch_y = gen_batch(FLAGS.batch_size)
@@ -38,7 +41,7 @@ with tf.Graph().as_default():
             print('loss:{},acc on train :{}---time:{}'.format(loss, acc, now - last))
             last = now
         if (i % FLAGS.save_freq) == 0:
-            print('Iterations:  ',i)
+            print('Iterations:  ', i)
             saver.save(sess, os.path.join(FLAGS.model_save_path,
                                           FLAGS.model_name),
                        global_step=global_step, write_meta_graph=False)
