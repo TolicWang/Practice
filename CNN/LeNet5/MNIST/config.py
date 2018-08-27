@@ -42,9 +42,7 @@ tf.flags.DEFINE_float(flag_name='dropout_keep_pro', default_value=0.5, docstring
 
 tf.flags.DEFINE_string(flag_name='model_save_path', default_value='./model/', docstring='model_save_path')
 tf.flags.DEFINE_string(flag_name='model_name', default_value='model.ckpt', docstring='model_name')
-tf.flags.DEFINE_string(flag_name='restore_model_name', default_value='model.ckpt-1001', docstring='restore_model_name')
-tf.flags.DEFINE_integer(flag_name='save_freq', default_value=5000, docstring='save_freq')
-
+tf.flags.DEFINE_integer(flag_name='save_freq', default_value=500, docstring='save_freq')
 tf.flags.DEFINE_integer(flag_name='test_batch_size', default_value=5000, docstring='test_batch_size')
 
 FLAGS = tf.flags.FLAGS
