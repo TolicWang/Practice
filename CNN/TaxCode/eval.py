@@ -27,8 +27,7 @@ cnn = TextCNN(sequence_length=FLAGS.padding_sentence_length,
 
 with tf.Session() as sess:
     saver = tf.train.Saver()
-    path = FLAGS.model_save_path + FLAGS.restore_model_name
-    saver.restore(sess, save_path=path)
+    saver.restore(sess, tf.train.latest_checkpoint(FLAGS.model_save_path))
     feed_dic = {cnn.input_x: x_test, cnn.input_y: y_test, cnn.dropout_keep_prob: 1.0}
     acc = sess.run(cnn.accuracy, feed_dict=feed_dic)
     print('----acc:{}---'.format(acc))
