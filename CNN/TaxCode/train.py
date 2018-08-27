@@ -72,8 +72,13 @@ with tf.Graph().as_default():
             train_step = tf.train.GradientDescentOptimizer(
                 learning_rate).minimize(loss=cnn.loss, global_step=global_step)
             # train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=cnn.loss, global_step=global_step)
+
     saver = tf.train.Saver()
-    sess.run(tf.global_variables_initializer())
+    if os.path.exists(FLAGS.model_save_path + 'checkpoint'):
+        saver.restore(sess, tf.train.latest_checkpoint(FLAGS.model_save_path))
+        learning_rate = tf.constant(0.001, dtype=tf.float32)
+    else:
+        sess.run(tf.global_variables_initializer())
     last = datetime.datetime.now()
     for i in range(FLAGS.training_ite):
         x_batch, y_batch = data_helper.gen_batch(x_train, y_train, i, FLAGS.batch_size)
@@ -93,4 +98,3 @@ with tf.Graph().as_default():
             saver.save(sess, os.path.join(FLAGS.model_save_path,
                                           FLAGS.model_name),
                        global_step=global_step)
-
